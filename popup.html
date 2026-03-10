@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Focus Mode</title>
+  <style>
+    :root {
+      --bg: #0f0f17;
+      --bg2: #1a1a2e;
+      --border: #2a2a4a;
+      --text: #e0e0e0;
+      --text2: #888;
+      --accent: #8b5cf6;
+      --danger: #ef4444;
+      --success: #22c55e;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 340px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 13px;
+      color: var(--text);
+      background: var(--bg);
+    }
+    .header {
+      padding: 14px 16px 10px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header-left { display: flex; align-items: center; gap: 8px; }
+    .header h1 { font-size: 15px; font-weight: 600; color: var(--accent); }
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--text2);
+    }
+    .status-dot.active { background: var(--danger); animation: pulse 2s infinite; }
+    .status-dot.break { background: var(--success); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+    /* Timer */
+    .timer-section {
+      padding: 24px 16px;
+      text-align: center;
+    }
+    .timer {
+      font-size: 56px;
+      font-weight: 700;
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+    }
+    .timer-label {
+      font-size: 12px;
+      color: var(--text2);
+      margin-top: 8px;
+    }
+    .timer-ring {
+      width: 160px;
+      height: 160px;
+      margin: 0 auto 12px;
+      position: relative;
+    }
+    .timer-ring svg { transform: rotate(-90deg); }
+    .timer-ring .timer-display {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Controls */
+    .controls {
+      padding: 0 16px 16px;
+      display: flex;
+      gap: 8px;
+    }
+    .btn {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg2);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .btn:hover { border-color: var(--accent); }
+    .btn-start { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn-start:hover { background: #7c3aed; }
+    .btn-stop { background: var(--danger); border-color: var(--danger); color: #fff; }
+    .btn-stop:hover { background: #dc2626; }
+    .btn-break { background: var(--success); border-color: var(--success); color: #fff; }
+    .btn-break:hover { background: #16a34a; }
+
+    /* Duration selector */
+    .duration-row {
+      padding: 0 16px 12px;
+      display: flex;
+      gap: 6px;
+    }
+    .dur-btn {
+      flex: 1;
+      padding: 6px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg2);
+      color: var(--text2);
+      cursor: pointer;
+      font-size: 12px;
+      text-align: center;
+    }
+    .dur-btn:hover { border-color: var(--accent); color: var(--text); }
+    .dur-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(139,92,246,0.1); }
+
+    /* Stats */
+    .stats {
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 12px;
+    }
+    .stat {
+      flex: 1;
+      text-align: center;
+    }
+    .stat-value { font-size: 18px; font-weight: 700; color: var(--accent); }
+    .stat-label { font-size: 10px; color: var(--text2); margin-top: 2px; }
+
+    /* Blocklist */
+    .blocklist-section {
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+    }
+    .blocklist-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .blocklist-header h3 { font-size: 12px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
+    .blocklist-toggle {
+      font-size: 11px;
+      color: var(--accent);
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+    .blocklist {
+      max-height: 120px;
+      overflow-y: auto;
+    }
+    .block-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 0;
+      font-size: 12px;
+    }
+    .block-item .remove-btn {
+      background: none;
+      border: none;
+      color: var(--text2);
+      cursor: pointer;
+      font-size: 14px;
+      padding: 0 4px;
+    }
+    .block-item .remove-btn:hover { color: var(--danger); }
+    .add-site {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .add-site input {
+      flex: 1;
+      padding: 6px 8px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text);
+      font-size: 12px;
+      outline: none;
+    }
+    .add-site input:focus { border-color: var(--accent); }
+    .add-site button {
+      padding: 6px 12px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text);
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .hidden { display: none; }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-left">
+      <div class="status-dot" id="statusDot"></div>
+      <h1>Focus Mode</h1>
+    </div>
+    <span id="statusText" style="font-size:11px;color:var(--text2)">Idle</span>
+  </div>
+
+  <div class="timer-section">
+    <div class="timer-ring">
+      <svg width="160" height="160" viewBox="0 0 160 160">
+        <circle cx="80" cy="80" r="70" fill="none" stroke="#2a2a4a" stroke-width="6"/>
+        <circle cx="80" cy="80" r="70" fill="none" stroke="#8b5cf6" stroke-width="6"
+          stroke-dasharray="440" stroke-dashoffset="440" stroke-linecap="round" id="ring"/>
+      </svg>
+      <div class="timer-display">
+        <div class="timer" id="timer">25:00</div>
+        <div class="timer-label" id="timerLabel">Ready to focus</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="duration-row" id="durationRow">
+    <button class="dur-btn" data-min="15">15m</button>
+    <button class="dur-btn active" data-min="25">25m</button>
+    <button class="dur-btn" data-min="45">45m</button>
+    <button class="dur-btn" data-min="60">60m</button>
+    <button class="dur-btn" data-min="90">90m</button>
+  </div>
+
+  <div class="controls" id="idleControls">
+    <button class="btn btn-start" id="startBtn">Start Focus</button>
+  </div>
+  <div class="controls hidden" id="activeControls">
+    <button class="btn btn-stop" id="stopBtn">End Session</button>
+    <button class="btn btn-break" id="breakBtn">Take Break</button>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-value" id="sessionCount">0</div>
+      <div class="stat-label">Sessions</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="totalMinutes">0</div>
+      <div class="stat-label">Minutes</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="blockedCount">0</div>
+      <div class="stat-label">Sites Blocked</div>
+    </div>
+  </div>
+
+  <div class="blocklist-section">
+    <div class="blocklist-header">
+      <h3>Blocked Sites</h3>
+      <button class="blocklist-toggle" id="toggleList">Edit</button>
+    </div>
+    <div class="blocklist hidden" id="blocklist"></div>
+    <div class="add-site hidden" id="addSiteRow">
+      <input type="text" id="newSite" placeholder="example.com">
+      <button id="addSiteBtn">Add</button>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

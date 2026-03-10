@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Blocked — Focus Mode</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #0f0f17;
+      color: #e0e0e0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    .icon { font-size: 64px; margin-bottom: 24px; }
+    h1 { font-size: 28px; color: #ef4444; margin-bottom: 8px; }
+    p { color: #888; font-size: 16px; margin-bottom: 24px; }
+    .site { color: #8b5cf6; font-weight: 600; }
+    .timer {
+      font-size: 48px;
+      font-weight: 700;
+      color: #8b5cf6;
+      font-variant-numeric: tabular-nums;
+      margin-bottom: 16px;
+    }
+    .sub { color: #666; font-size: 14px; }
+    .quote {
+      max-width: 400px;
+      text-align: center;
+      color: #666;
+      font-style: italic;
+      margin-top: 32px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="icon">&#x1F6D1;</div>
+  <h1>Site Blocked</h1>
+  <p><span class="site" id="siteName"></span> is blocked during focus mode</p>
+  <div class="timer" id="timer">--:--</div>
+  <p class="sub">remaining in your focus session</p>
+  <p class="quote" id="quote"></p>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    document.getElementById('siteName').textContent = params.get('site') || 'This site';
+
+    const quotes = [
+      'The secret of getting ahead is getting started.',
+      'Focus on being productive instead of busy.',
+      'It is during our darkest moments that we must focus to see the light.',
+      'Starve your distractions, feed your focus.',
+      'Where focus goes, energy flows.',
+      'The successful warrior is the average person, with laser-like focus.',
+    ];
+    document.getElementById('quote').textContent = '"' + quotes[Math.floor(Math.random() * quotes.length)] + '"';
+
+    function updateTimer() {
+      chrome.storage.local.get('focusState', (result) => {
+        const state = result.focusState;
+        if (!state?.active || !state.endTime) {
+          document.getElementById('timer').textContent = '00:00';
+          return;
+        }
+        const remaining = Math.max(0, state.endTime - Date.now());
+        const mins = Math.floor(remaining / 60000);
+        const secs = Math.floor((remaining % 60000) / 1000);
+        document.getElementById('timer').textContent =
+          String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+
+        if (remaining <= 0) {
+          document.getElementById('timer').textContent = 'Done!';
+        }
+      });
+    }
+
+    updateTimer();
+    setInterval(updateTimer, 1000);
+  </script>
+</body>
+</html>
